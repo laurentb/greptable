@@ -1,0 +1,19 @@
+=========
+greptable
+=========
+
+Description
+-----------
+
+``greptable`` generates a plain-text list of your servers, databases and tables,
+so that you can easily find where the fuck that table is, with your favorite
+search tools, like ``grep``.
+
+This is especially useful if you are dealing with many servers and databases.
+
+Requirements
+------------
+
+``greptable`` works on both Python 2 and Python 3.
+
+The only dependency is ``SQLAlchemy``, and it should support the same databases.
