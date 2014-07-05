@@ -13,6 +13,8 @@ class Server(object):
     def __init__(self, url, name=None):
         if name is None:
             name = urlsplit(url).hostname
+        if name is None:
+            name = url
         self.url = url
         self.name = name
         self.engine = create_engine(self.url)
