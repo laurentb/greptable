@@ -76,6 +76,10 @@ def print_servers(servers, outfile):
                 print(table, file=outfile)
 
 
-if __name__ == '__main__':
+def main():
     servers = get_config()
     print_servers(servers, outfile=sys.stdout)
+
+
+if __name__ == '__main__':
+    main()
