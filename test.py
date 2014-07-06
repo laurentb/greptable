@@ -29,7 +29,6 @@ class Test(TestCase):
         cx.execute('CREATE TABLE penguins (name VARCHAR, type VARCHAR);')
         cx.close()
 
-
     def test_simple_output(self):
         testio = StringIO()
         print_servers(self.servers, testio)

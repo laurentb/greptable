@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from __future__ import print_function, unicode_literals
 
+import argparse
+import os
 import sys
 
 from sqlalchemy import create_engine, inspect
@@ -56,7 +58,7 @@ class Table(object):
         return '%s:%s' % (self.schema, self.name)
 
 
-def get_config(path='greptable.conf'):
+def get_config(path):
     with open(path) as f:
         config = f.read()
     return parse_config(config)
@@ -77,8 +79,21 @@ def print_servers(servers, outfile):
 
 
 def main():
-    servers = get_config()
-    print_servers(servers, outfile=sys.stdout)
+    def fp(filename):
+        if filename == '-':
+            return sys.stdout
+        if os.path.exists(filename):
+            raise argparse.ArgumentTypeError("File already exists.")
+        return open(filename, 'w')
+
+    parser = argparse.ArgumentParser(
+        description='')
+    parser.add_argument('-c', '--config', default='greptable.conf')
+    parser.add_argument('-o', '--output', default='-', type=fp)
+    args = parser.parse_args()
+
+    servers = get_config(args.config)
+    print_servers(servers, outfile=args.output)
 
 
 if __name__ == '__main__':
