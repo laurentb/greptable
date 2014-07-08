@@ -38,3 +38,12 @@ class Test(TestCase):
         testio = StringIO()
         print_servers(self.servers, testio)
         self.assertEqual(testio.getvalue().strip(), expected.strip())
+
+    def test_separators(self):
+        testio = StringIO()
+        print_servers(self.servers, testio, '|')
+        testio = testio.getvalue()
+        assert '|' in testio
+        for line in testio.splitlines():
+            if ':memory:' not in line:
+                assert ':' not in line

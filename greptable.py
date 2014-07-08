@@ -51,8 +51,8 @@ class Schema(object):
         for tablename in inspector.get_table_names(self.name):
             yield Table(self, tablename)
 
-    def __str__(self):
-        return '%s:%s' % (self.server, self.name or '')
+    def __str__(self, separator=':'):
+        return '%s%s%s' % (self.server, separator, self.name or '')
 
 
 class Table(object):
@@ -60,8 +60,8 @@ class Table(object):
         self.schema = schema
         self.name = name
 
-    def __str__(self):
-        return '%s:%s' % (self.schema, self.name)
+    def __str__(self, separator=':'):
+        return '%s%s%s' % (self.schema.__str__(separator), separator, self.name)
 
 
 def get_config(path):
@@ -81,13 +81,13 @@ def parse_config(config_text):
         yield Server(url, items.get('name'))
 
 
-def print_servers(servers, outfile):
+def print_servers(servers, outfile, separator=':'):
     for server in servers:
-        print(server, file=outfile)
+        print(server.__str__(), file=outfile)
         for schema in server.schemas():
-            print(schema, file=outfile)
+            print(schema.__str__(separator), file=outfile)
             for table in schema.tables():
-                print(table, file=outfile)
+                print(table.__str__(separator), file=outfile)
 
 
 def main():
@@ -102,10 +102,11 @@ def main():
         description='')
     parser.add_argument('-c', '--config', default='greptable.conf')
     parser.add_argument('-o', '--output', default='-', type=fp)
+    parser.add_argument('-s', '--separator', default=':')
     args = parser.parse_args()
 
     servers = get_config(args.config)
-    print_servers(servers, outfile=args.output)
+    print_servers(servers, args.output, args.separator)
 
 
 if __name__ == '__main__':
