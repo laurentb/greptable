@@ -14,14 +14,15 @@ from greptable import parse_config, print_servers
 expected = """
 sqlite:///:memory:
 sqlite:///:memory::
-sqlite://
-sqlite://:
-sqlite://::penguins
+MEM
+MEM:
+MEM::penguins
 """
 
 config = """
 [sqlite:///:memory:]
 [sqlite://]
+name = MEM
 """
 
 

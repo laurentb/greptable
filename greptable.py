@@ -77,7 +77,8 @@ def parse_config(config_text):
     else:
         config.readfp(io.StringIO(config_text))
     for url in config.sections():
-        yield Server(url)
+        items = dict(config.items(url))
+        yield Server(url, items.get('name'))
 
 
 def print_servers(servers, outfile):
