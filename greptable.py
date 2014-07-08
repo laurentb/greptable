@@ -2,6 +2,7 @@
 from __future__ import print_function, unicode_literals
 
 import argparse
+import io
 import os
 import sys
 
@@ -11,6 +12,11 @@ try:
     from urllib.parse import urlsplit
 except ImportError:
     from urlparse import urlsplit
+
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 
 
 class Server(object):
@@ -59,13 +65,18 @@ class Table(object):
 
 
 def get_config(path):
-    with open(path) as f:
+    with io.open(path, encoding='utf-8') as f:
         config = f.read()
     return parse_config(config)
 
 
-def parse_config(config):
-    for url in config.splitlines():
+def parse_config(config_text):
+    config = configparser.RawConfigParser()
+    if hasattr(config, 'read_file'):
+        config.read_file(io.StringIO(config_text))
+    else:
+        config.readfp(io.StringIO(config_text))
+    for url in config.sections():
         yield Server(url)
 
 

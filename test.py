@@ -14,15 +14,19 @@ from greptable import parse_config, print_servers
 expected = """
 sqlite:///:memory:
 sqlite:///:memory::
-sqlite:///:memory:
-sqlite:///:memory::
-sqlite:///:memory:::penguins
+sqlite://
+sqlite://:
+sqlite://::penguins
+"""
+
+config = """
+[sqlite:///:memory:]
+[sqlite://]
 """
 
 
 class Test(TestCase):
     def setUp(self):
-        config = '\n'.join(['sqlite:///:memory:', 'sqlite:///:memory:'])
         self.servers = list(parse_config(config))
 
         cx = self.servers[1].engine.connect()
