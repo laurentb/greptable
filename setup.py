@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name='greptable',
-    version='0.0.0',
+    version='1.0.0',
     description='List tables of SQL databases for easy schema greps',
     long_description=open('README').read(),
     author='Laurent Bachelier',
