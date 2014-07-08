@@ -81,7 +81,7 @@ def parse_config(config_text):
         yield Server(url, items.get('name'))
 
 
-def print_servers(servers, outfile, separator=':'):
+def dump_servers(servers, outfile, separator=':'):
     for server in servers:
         print(server.__str__(), file=outfile)
         for schema in server.schemas():
@@ -98,15 +98,22 @@ def main():
             raise argparse.ArgumentTypeError("File already exists.")
         return open(filename, 'w')
 
-    parser = argparse.ArgumentParser(
-        description='')
-    parser.add_argument('-c', '--config', default='greptable.conf')
-    parser.add_argument('-o', '--output', default='-', type=fp)
-    parser.add_argument('-s', '--separator', default=':')
-    args = parser.parse_args()
+    def dump(args):
+        servers = get_config(args.config)
+        dump_servers(servers, args.output, args.separator)
 
-    servers = get_config(args.config)
-    print_servers(servers, args.output, args.separator)
+    parser = argparse.ArgumentParser(description="List tables of SQL databases for easy schema greps")
+    parser.add_argument('-s', '--separator', default=':')
+    parser.add_argument('-c', '--config', default='greptable.conf')
+    subparsers = parser.add_subparsers(dest='subcommand')
+    subparsers.required = True
+
+    dump_parser = subparsers.add_parser('dump', help="Dump the table list")
+    dump_parser.add_argument('-o', '--output', default='-', type=fp)
+    dump_parser.set_defaults(method=dump)
+
+    args = parser.parse_args()
+    return args.method(args)
 
 
 if __name__ == '__main__':

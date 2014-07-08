@@ -8,7 +8,7 @@ try:
 except ImportError:
     from io import StringIO
 
-from greptable import parse_config, print_servers
+from greptable import parse_config, dump_servers
 
 
 expected = """
@@ -36,12 +36,12 @@ class Test(TestCase):
 
     def test_simple_output(self):
         testio = StringIO()
-        print_servers(self.servers, testio)
+        dump_servers(self.servers, testio)
         self.assertEqual(testio.getvalue().strip(), expected.strip())
 
     def test_separators(self):
         testio = StringIO()
-        print_servers(self.servers, testio, '|')
+        dump_servers(self.servers, testio, '|')
         testio = testio.getvalue()
         assert '|' in testio
         for line in testio.splitlines():
