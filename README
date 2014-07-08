@@ -2,6 +2,7 @@
 greptable
 =========
 
+
 Description
 -----------
 
@@ -11,9 +12,59 @@ search tools, like ``grep``.
 
 This is especially useful if you are dealing with many servers and databases.
 
+
 Requirements
 ------------
 
 ``greptable`` works on both Python 2 and Python 3.
 
 The only dependency is ``SQLAlchemy``, and it should support the same databases.
+
+
+Usage
+-----
+
+For global options run ``greptable -h``.
+
+Listing tables
+~~~~~~~~~~~~~~
+
+To list the tables, run ``greptable dump``.
+
+You can change the configuration file path with the ``-c``
+(also known as ``--config``).
+By default, it uses ``~/.config/greptable.conf`` if it exists,
+otherwise ``greptable.conf`` from the current directory.
+
+The tables are listed to the standard output by default.
+The ``-o`` (also known as ``--output``) option can dump in a file instead.
+
+Example: ``greptable -c greptable.conf dump -o tables.txt``
+
+For full help on options run ``greptable dump -h``.
+
+
+Configuration
+-------------
+
+The configuration is a standard INI file.
+Section headers are `SQLAlchemy URLs <http://docs.sqlalchemy.org/en/latest/core/engines.html>`_.
+
+For example::
+
+    [mysql://user:password@server1]
+    [sqlite:///db.sqlite]
+
+``greptable`` will try to prettify server URLs, but you can also force a name.
+
+For example::
+
+    [mysql://user:password@server1]
+    [sqlite:///db.sqlite]
+    name = db
+
+
+Development
+-----------
+
+Contributions can be sent in the form of git patches, to laurent@bachelier.name.
