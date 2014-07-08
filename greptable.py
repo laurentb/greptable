@@ -102,9 +102,16 @@ def main():
         servers = get_config(args.config)
         dump_servers(servers, args.output, args.separator)
 
+    # if user config exists, use it by default
+    confpath = os.path.join(
+        os.environ.get('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config')),
+        'greptable.conf')
+    if not os.path.exists(confpath):
+        confpath = 'greptable.conf'
+
     parser = argparse.ArgumentParser(description="List tables of SQL databases for easy schema greps")
     parser.add_argument('-s', '--separator', default=':')
-    parser.add_argument('-c', '--config', default='greptable.conf')
+    parser.add_argument('-c', '--config', default=confpath)
     subparsers = parser.add_subparsers(dest='subcommand')
     subparsers.required = True
 
