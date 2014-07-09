@@ -27,7 +27,13 @@ class Server(object):
             name = url
         self.url = url
         self.name = name
-        self.engine = create_engine(self.url)
+        self._engine = None
+
+    @property
+    def engine(self):
+        if not self._engine:
+            self._engine = create_engine(self.url)
+        return self._engine
 
     def __str__(self):
         return self.name
