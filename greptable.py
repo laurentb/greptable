@@ -19,14 +19,28 @@ except ImportError:
     import ConfigParser as configparser
 
 
+class NotEnoughParameters(ValueError):
+    pass
+
+
+class ServerNotFound(Exception):
+    pass
+
+
+class MissingOpenURL(Exception):
+    pass
+
+
 class Server(object):
-    def __init__(self, url, name=None):
+    def __init__(self, url, name=None, openschema=None, opentable=None):
         if name is None:
             name = urlsplit(url).hostname
         if name is None:
             name = url
         self.url = url
         self.name = name
+        self.openschema = openschema
+        self.opentable = opentable
         self._engine = None
 
     @property
@@ -45,6 +59,17 @@ class Server(object):
             yield Schema(self, inspector.default_schema_name)
         for dbname in dbs:
             yield Schema(self, dbname)
+
+    def open_url(self, schema, table=None):
+        opentable = self.opentable
+        openschema = self.openschema or opentable
+        if table:
+            if not opentable:
+                raise MissingOpenURL()
+            return opentable.format(server=self, schema=schema, table=table)
+        if not openschema:
+            raise MissingOpenURL()
+        return openschema.format(server=self, schema=schema, table='')
 
 
 class Schema(object):
@@ -84,7 +109,7 @@ def parse_config(config_text):
         config.readfp(io.StringIO(config_text))
     for url in config.sections():
         items = dict(config.items(url))
-        yield Server(url, items.get('name'))
+        yield Server(url, items.get('name'), items.get('openschema'), items.get('opentable'))
 
 
 def dump_servers(servers, outfile, separator=':'):
@@ -94,6 +119,25 @@ def dump_servers(servers, outfile, separator=':'):
             print(schema.__str__(separator), file=outfile)
             for table in schema.tables():
                 print(table.__str__(separator), file=outfile)
+
+
+def get_server(servers, name):
+    for server in servers:
+        if server.name == name:
+            return server
+    for server in servers:
+        if server.url == name:
+            return server
+    raise ServerNotFound()
+
+
+def get_url(servers, line, separator=':'):
+    args = line.split(separator)
+    server, schema, table = args + [None] * (3 - len(args))
+    if schema or table:
+        server = get_server(servers, server)
+        return server.open_url(schema, table)
+    raise NotEnoughParameters()
 
 
 def main():
@@ -107,6 +151,26 @@ def main():
     def dump(args):
         servers = get_config(args.config)
         dump_servers(servers, args.output, args.separator)
+
+    def opn(args):
+        servers = get_config(args.config)
+        try:
+            url = get_url(servers, args.line, args.separator)
+        except ServerNotFound:
+            print("Could not find server in configuration", file=sys.stderr)
+            return 2
+        except MissingOpenURL:
+            print("No open URL configured for this server", file=sys.stderr)
+            return 3
+        except ValueError:
+            print("Invalid table or schema line", file=sys.stderr)
+            return 4
+        if args.show:
+            print(url)
+        else:
+            print("Opening %s" % url, file=sys.stderr)
+            sys.stderr.flush()
+            os.execlp('xdg-open', 'xdg-open', url)
 
     # if user config exists, use it by default
     confpath = os.path.join(
@@ -125,8 +189,13 @@ def main():
     dump_parser.add_argument('-o', '--output', default='-', type=fp)
     dump_parser.set_defaults(method=dump)
 
+    dump_parser = subparsers.add_parser('open', help="Open a table or schema")
+    dump_parser.add_argument('-s', '--show', action='store_true', help="only show the URL")
+    dump_parser.add_argument('line', help="table or schema line to open")
+    dump_parser.set_defaults(method=opn)
+
     args = parser.parse_args()
-    return args.method(args)
+    sys.exit(args.method(args))
 
 
 if __name__ == '__main__':

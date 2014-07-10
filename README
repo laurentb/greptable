@@ -26,6 +26,8 @@ Usage
 
 For global options run ``greptable -h``.
 
+All commands need a configuration file; see the *Configuration* section below.
+
 Listing tables
 ~~~~~~~~~~~~~~
 
@@ -43,6 +45,24 @@ Example: ``greptable -c greptable.conf dump -o tables.txt``
 
 For full help on options run ``greptable dump -h``.
 
+Opening tables
+~~~~~~~~~~~~~~
+
+``greptable`` lets you open a table or schema in your favorite admin interface,
+built from a configured URL template.
+
+This is thought for phpMyAdmin, but should work with other tools, even
+non-web (if not, please provide examples or patches).
+
+Using it is as simple as running ``greptable open`` followed
+by the selected output of a ``greptable dump``.
+You can even do ``greptable open $(greptable dump|grep mytable)``.
+
+The URL will be opened by ``xdg-open``. If it's not opening the wanted
+browser, you should set the ``BROWSER`` environment variable.
+
+If you only want to show the URL, and not open it automatically, use the
+``-s`` (also known as ``--show``) option.
 
 Configuration
 -------------
@@ -62,6 +82,25 @@ For example::
     [mysql://user:password@server1]
     [sqlite:///db.sqlite]
     name = db
+
+For the ``open`` subcommand, you can provide both a ``openschema`` and ``opentable``
+option. If the ``openschema`` option is not provided, ``opentable`` will be used,
+with the table parameter being an empty string.
+
+The variable substitution uses the Python ``format()`` syntax.
+
+For example::
+
+    [mysql://user:password@server1]
+    opentable = https://penguincorp.com/pma/index.php?server=0&db={schema}&table={table}
+
+    [mysql://user:password@server2]
+    opentable = https://penguincorp.com/pma/index.php?server=1&db={schema}&table={table}
+
+    [otherdb://user:password@server]
+    name = srv0
+    openschema = https://penguincorp.com/otherdb/{server}/tables/{schema}
+    opentable = https://penguincorp.com/otherdb/{server}/showtable/{schema}/{table}
 
 
 Development
